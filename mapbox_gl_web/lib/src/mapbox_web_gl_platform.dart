@@ -245,6 +245,11 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
   }
 
   @override
+  Future<void> setMaximumFps(int value) async {
+    throw UnsupportedError('Limiting FPS not supported in web');
+  }
+
+  @override
   Future<void> setTelemetryEnabled(bool enabled) async {
     print('Telemetry not available in web');
     return;
@@ -817,6 +822,24 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
         maxzoom: maxzoom,
         filter: filter,
         enableInteraction: enableInteraction);
+  }
+
+  Future<void> setLayerProperties(
+      String layerId, Map<String, dynamic> properties) async {
+    for (final entry in properties.entries) {
+      // Very hacky: because we don't know if the property is a layout
+      // or paint property, we try to set it as both.
+      try {
+        _map.setLayoutProperty(layerId, entry.key, entry.value);
+      } catch (e) {
+        print('Caught exception (usually safe to ignore): $e');
+      }
+      try {
+        _map.setPaintProperty(layerId, entry.key, entry.value);
+      } catch (e) {
+        print('Caught exception (usually safe to ignore): $e');
+      }
+    }
   }
 
   @override

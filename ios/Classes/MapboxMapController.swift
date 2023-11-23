@@ -207,6 +207,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 style.localizeLabels(into: locale)
             }
             result(nil)
+        case "map#setMaximumFps":
+            result(FlutterError(
+                code: "notSupported",
+                message: "Setting FPS not supported on iOS",
+                details: "There is no platform support for setting FPS on iOS."
+            ))
         case "map#queryRenderedFeatures":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             var styleLayerIdentifiers: Set<String>?
@@ -400,6 +406,45 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             case .success: result(nil)
             case let .failure(error): result(error.flutterError)
             }
+
+        case "layer#setProperties":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let layerId = arguments["layerId"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: String] else { return }
+
+            guard let layer = mapView.style?.layer(withIdentifier: layerId) else {
+                result(FlutterError(
+                    code: "LAYER_NOT_FOUND_ERROR",
+                    message: "Layer " + layerId + "not found",
+                    details: ""
+                ))
+                return
+            }
+
+            //switch depending on the runtime type of layer
+            switch layer {
+            case let lineLayer as MGLLineStyleLayer:
+                LayerPropertyConverter.addLineProperties(lineLayer: lineLayer, properties: properties)
+            case let fillLayer as MGLFillStyleLayer:
+                LayerPropertyConverter.addFillProperties(fillLayer: fillLayer, properties: properties)
+            case let circleLayer as MGLCircleStyleLayer:
+                LayerPropertyConverter.addCircleProperties(circleLayer: circleLayer, properties: properties)
+             case let symbolLayer as MGLSymbolStyleLayer:
+                LayerPropertyConverter.addSymbolProperties(symbolLayer: symbolLayer, properties: properties)
+            case let rasterLayer as MGLRasterStyleLayer:
+                LayerPropertyConverter.addRasterProperties(rasterLayer: rasterLayer, properties: properties)
+            case let hillshadeLayer as MGLHillshadeStyleLayer:
+                LayerPropertyConverter.addHillshadeProperties(hillshadeLayer: hillshadeLayer, properties: properties)
+            default:
+                result(FlutterError(
+                    code: "UNSUPPORTED_LAYER_TYPE",
+                    message: "Layer type not supported",
+                    details: ""
+                ))
+                return
+            }
+
+            result(nil)
 
         case "fillLayer#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }

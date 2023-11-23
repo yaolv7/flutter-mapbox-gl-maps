@@ -22,11 +22,12 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 31
-    ndkVersion "20.1.5948944"
+    compileSdkVersion flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
     
     lintOptions {
         disable 'InvalidPackage'
@@ -69,6 +70,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     constraints {
         implementation('com.google.android.gms:play-services-location') {
             version {

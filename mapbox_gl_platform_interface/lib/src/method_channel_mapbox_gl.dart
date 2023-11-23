@@ -263,6 +263,13 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   }
 
   @override
+  Future<void> setMaximumFps(int fps) async {
+    await _channel.invokeMethod('map#setMaximumFps', <String, dynamic>{
+      'fps': fps,
+    });
+  }
+
+  @override
   Future<void> setTelemetryEnabled(bool enabled) async {
     await _channel.invokeMethod('map#setTelemetryEnabled', <String, dynamic>{
       'enabled': enabled,
@@ -605,6 +612,16 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
       'maxzoom': maxzoom,
       'filter': jsonEncode(filter),
       'enableInteraction': enableInteraction,
+      'properties': properties
+          .map((key, value) => MapEntry<String, String>(key, jsonEncode(value)))
+    });
+  }
+
+  @override
+  Future<void> setLayerProperties(
+      String layerId, Map<String, dynamic> properties) async {
+    await _channel.invokeMethod('layer#setProperties', <String, dynamic>{
+      'layerId': layerId,
       'properties': properties
           .map((key, value) => MapEntry<String, String>(key, jsonEncode(value)))
     });

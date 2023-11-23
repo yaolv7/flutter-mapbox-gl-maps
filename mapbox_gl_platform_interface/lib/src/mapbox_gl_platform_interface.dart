@@ -63,6 +63,7 @@ abstract class MapboxGlPlatform {
 
   Future<void> updateContentInsets(EdgeInsets insets, bool animated);
   Future<void> setMapLanguage(String language);
+  Future<void> setMaximumFps(int fps);
   Future<void> setTelemetryEnabled(bool enabled);
 
   Future<bool> getTelemetryEnabled();
@@ -140,6 +141,9 @@ abstract class MapboxGlPlatform {
       double? maxzoom,
       dynamic filter,
       required bool enableInteraction});
+
+  Future<void> setLayerProperties(
+      String layerId, Map<String, dynamic> properties);
 
   Future<void> addFillLayer(
       String sourceId, String layerId, Map<String, dynamic> properties,

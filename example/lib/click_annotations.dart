@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:mapbox_gl_example/main.dart';
@@ -27,7 +29,8 @@ class ClickAnnotationBody extends StatefulWidget {
 
 class ClickAnnotationBodyState extends State<ClickAnnotationBody> {
   ClickAnnotationBodyState();
-  static const LatLng center = const LatLng(-33.88, 151.16);
+
+  static const LatLng center = const LatLng(23.89910008, 100.08330345);
   bool overlapping = false;
 
   MapboxMapController? controller;
@@ -126,6 +129,7 @@ class ClickAnnotationBodyState extends State<ClickAnnotationBody> {
         ],
         fillColor: "#FF0000",
         fillOutlineColor: "#000000",
+        draggable: true,
       ),
     );
   }
@@ -134,6 +138,7 @@ class ClickAnnotationBodyState extends State<ClickAnnotationBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: MapboxMap(
+        styleString: json.encode(myLightThemeData2()),
         accessToken: MapsDemo.ACCESS_TOKEN,
         annotationOrder: [
           AnnotationType.fill,
@@ -145,7 +150,7 @@ class ClickAnnotationBodyState extends State<ClickAnnotationBody> {
         onStyleLoadedCallback: _onStyleLoaded,
         initialCameraPosition: const CameraPosition(
           target: center,
-          zoom: 12.0,
+          zoom: 14.0,
         ),
       ),
       floatingActionButton: ElevatedButton(
@@ -165,4 +170,431 @@ class ClickAnnotationBodyState extends State<ClickAnnotationBody> {
           )),
     );
   }
+}
+
+Map<String, dynamic> myLightThemeData() {
+  return {
+    "version": 8,
+    "name": "Land",
+    "metadata": {"mapbox:autocomposite": true},
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "center": [100.08330345, 23.89910008],
+    "zoom": 14,
+    "sources": {
+      "raster-source": {
+        "type": "raster",
+        "tiles": [
+          "https://maps1.ynmap.cn/tileServer/service/maps/ynImgMN/3857/WMTS/tile/default/{z}/{y}/{x}?key=0a9937c90fd94ee1a5ce540ad08858c6"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 0,
+        "maxzoom": 22,
+        "attribution": "这就是一个描述",
+        "tileSize": 256
+      },
+      "vector-source": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.59:8764/tile/vector/gis_dltb_2022/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      },
+      "vector-source-2020": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.131:8764/tile/vector/gis_dltb_2020/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      },
+      "vector-source-2019": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.131:8764/tile/vector/gis_dltb_2019/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      },
+      "vector-source-2018": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.131:8764/tile/vector/gis_dltb_2018/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      },
+      "vector-source-2017": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.131:8764/tile/vector/gis_dltb_2017/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      },
+      "vector-source-2016": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.131:8764/tile/vector/gis_dltb_2016/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      }
+    },
+    "layers": [
+      {"type": "raster", "source": "raster-source", "id": "lyunnan"},
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source",
+        "id": "fillAll",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2022",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14",
+        "type": "symbol",
+        "source": "vector-source",
+        "source-layer": "gis_dltb_2022",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      },
+
+
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source-2020",
+        "id": "fillAll2020",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2020",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14_2020",
+        "type": "symbol",
+        "source": "vector-source-2020",
+        "source-layer": "gis_dltb_2020",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      },
+
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source-2019",
+        "id": "fillAll-2019",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2019",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14_2019",
+        "type": "symbol",
+        "source": "vector-source-2019",
+        "source-layer": "gis_dltb_2019",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      },
+
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source-2018",
+        "id": "fillAll-2018",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2018",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14-2018",
+        "type": "symbol",
+        "source": "vector-source-2018",
+        "source-layer": "gis_dltb_2018",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      },
+
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source-2017",
+        "id": "fillAll-17",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2017",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14-17",
+        "type": "symbol",
+        "source": "vector-source-2017",
+        "source-layer": "gis_dltb_2017",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      },
+
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source-2016",
+        "id": "fillAll-16",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2016",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14-16",
+        "type": "symbol",
+        "source": "vector-source-2016",
+        "source-layer": "gis_dltb_2016",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      }
+    ]
+  };
+}
+
+
+Map<String, dynamic> myLightThemeData2() {
+  return {
+    "version": 8,
+    "name": "Land",
+    "metadata": {"mapbox:autocomposite": true},
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "center": [100.08330345, 23.89910008],
+    "zoom": 14,
+    "sources": {
+      "raster-source": {
+        "type": "raster",
+        "tiles": [
+          "https://maps1.ynmap.cn/tileServer/service/maps/ynImgMN/3857/WMTS/tile/default/{z}/{y}/{x}?key=0a9937c90fd94ee1a5ce540ad08858c6"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 0,
+        "maxzoom": 22,
+        "attribution": "这就是一个描述",
+        "tileSize": 256
+      },
+      "vector-source": {
+        "type": "vector",
+        "tiles": [
+          "http://19.16.1.59:8764/tile/vector/gis_dltb_2022/3857/256/{z}/{x}/{y}.pbf?Authorization=Bearer eyJhbGciOiJIUzI1NiIsImp3dFR5cGUiOiJBU1NFVCIsInR5cCI6IkpXVCJ9.eyJ1bml0VHlwZSI6MSwic3ViIjoiNTMwODIzIiwiYXVkIjoiZ2VuZXJhbCIsInJlZ2lvbkNvZGUiOiI1MzA4MjMiLCJyb2xlSWQiOjcsImlzcyI6IllOX01FUFUiLCJ1bml0SWQiOjIyLCJleHAiOjE3MDExNTUzMDksInVzZXJJZCI6MiwiaWF0IjoxNzAwNTUwNTA2LCJzcmlkIjo0NTIyfQ.nSFkvzFiLN0n5M9a_bbWf2WEccDBhYgi8xwgQQWtvJs"
+        ],
+        "bounds": [-180, -85.051129, 180, 85.051129],
+        "scheme": "xyz",
+        "minzoom": 10,
+        "maxzoom": 18,
+        "attribution": "这就是一个描述"
+      }
+    },
+    "layers": [
+      {"type": "raster", "source": "raster-source", "id": "lyunnan"},
+      {
+        "layout": {"visibility": "visible"},
+        "type": "fill",
+        "source": "vector-source",
+        "id": "fillAll",
+        "paint": {
+          "fill-color": [
+            "match",
+            ["get", "type"],
+            "0301",
+            "rgba(49.0, 173.0, 105.0, 1.0)",
+            "0810",
+            "rgba(129.0, 195.0, 93.0, 1.0)",
+            "0701",
+            "rgba(229.0, 103.0, 102.0, 1.0)",
+            "rgba(204.0, 204.0, 204.0, 0.5)"
+          ],
+          "fill-opacity": 1
+        },
+        "source-layer": "gis_dltb_2022",
+        "fill-outline-color": "rgba(0, 0, 0, 1)"
+      },
+      {
+        "id": "poi_z14",
+        "type": "symbol",
+        "source": "vector-source",
+        "source-layer": "gis_dltb_2022",
+        "layout": {
+          "text-anchor": "top",
+          "text-field": "{typeName}",
+          "text-max-width": 10,
+          "text-size": 12,
+          "text-line-height": 5.0
+        },
+        "paint": {
+          "text-color": "rgba(228, 11, 11, 1)",
+          "text-halo-blur": 0.5,
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1
+        }
+      }
+    ]
+  };
 }

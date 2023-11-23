@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 import 'package:mapbox_gl_example/main.dart';
 import 'package:mapbox_gl_example/page.dart';
@@ -14,36 +16,129 @@ class LayerPage extends ExamplePage {
 }
 
 class LayerBody extends StatefulWidget {
+  const LayerBody({super.key});
+
   @override
   State<StatefulWidget> createState() => LayerState();
 }
 
 class LayerState extends State {
-  static final LatLng center = const LatLng(-33.86711, 151.1947171);
+  static const LatLng center = LatLng(-33.86711, 151.1947171);
 
   late MapboxMapController controller;
   Timer? bikeTimer;
   Timer? filterTimer;
-  Timer? visibilityTimer;
   int filteredId = 0;
-  bool isVisible = true;
+  bool linesVisible = true;
+  bool fillsVisible = true;
+  bool symbolsVisible = true;
+  bool circlesVisible = true;
+  bool linesRed = false;
+  bool fillsRed = true;
+  bool symbolsRed = false;
+  bool circlesRed = false;
 
   @override
   Widget build(BuildContext context) {
-    return MapboxMap(
-      accessToken: MapsDemo.ACCESS_TOKEN,
-      dragEnabled: false,
-      myLocationEnabled: true,
-      onMapCreated: _onMapCreated,
-      onMapClick: (point, latLong) =>
-          print(point.toString() + latLong.toString()),
-      onStyleLoadedCallback: _onStyleLoadedCallback,
-      initialCameraPosition: CameraPosition(
-        target: center,
-        zoom: 11.0,
+    return ListView(children: <Widget>[
+      Center(
+        child: SizedBox(
+            height: 400.0,
+            child: MapboxMap(
+              accessToken: MapsDemo.ACCESS_TOKEN,
+              dragEnabled: false,
+              myLocationEnabled: true,
+              onMapCreated: _onMapCreated,
+              onMapClick: (point, latLong) =>
+                  debugPrint(point.toString() + latLong.toString()),
+              onStyleLoadedCallback: _onStyleLoadedCallback,
+              initialCameraPosition: const CameraPosition(
+                target: center,
+                zoom: 11.0,
+              ),
+              annotationOrder: const [],
+            )),
       ),
-      annotationOrder: const [],
-    );
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "lines",
+                  LineLayerProperties.fromJson(
+                      {"visibility": linesVisible ? "none" : "visible"}))
+              .then((value) => setState(() => linesVisible = !linesVisible));
+        },
+        child: const Text('toggle line visibility'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "lines",
+                  LineLayerProperties.fromJson(
+                      {"line-color": linesRed ? "#0000ff" : "#ff0000"}))
+              .then((value) => setState(() => linesRed = !linesRed));
+        },
+        child: const Text('toggle line color'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "fills",
+                  FillLayerProperties.fromJson(
+                      {"visibility": fillsVisible ? "none" : "visible"}))
+              .then((value) => setState(() => fillsVisible = !fillsVisible));
+        },
+        child: const Text('toggle fill visibility'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "fills",
+                  FillLayerProperties.fromJson(
+                      {"fill-color": fillsRed ? "#0000ff" : "#ff0000"}))
+              .then((value) => setState(() => fillsRed = !fillsRed));
+        },
+        child: const Text('toggle fill color'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "circles",
+                  CircleLayerProperties.fromJson(
+                      {"visibility": circlesVisible ? "none" : "visible"}))
+              .then(
+                  (value) => setState(() => circlesVisible = !circlesVisible));
+        },
+        child: const Text('toggle circle visibility'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "circles",
+                  CircleLayerProperties.fromJson(
+                      {"circle-color": circlesRed ? "#0000ff" : "#ff0000"}))
+              .then((value) => setState(() => circlesRed = !circlesRed));
+        },
+        child: const Text('toggle circle color'),
+      ),
+      TextButton(
+        onPressed: () {
+          controller
+              .setLayerProperties(
+                  "symbols",
+                  SymbolLayerProperties.fromJson(
+                      {"visibility": symbolsVisible ? "none" : "visible"}))
+              .then(
+                  (value) => setState(() => symbolsVisible = !symbolsVisible));
+        },
+        child: const Text('toggle (non-moving) symbols visibility'),
+      ),
+    ]);
   }
 
   void _onMapCreated(MapboxMapController controller) {
@@ -56,7 +151,7 @@ class LayerState extends State {
     final snackBar = SnackBar(
       content: Text(
         'Tapped feature with id $featureId',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
       backgroundColor: Theme.of(context).primaryColor,
     );
@@ -64,7 +159,16 @@ class LayerState extends State {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  /// Adds an asset image to the currently displayed style
+  Future<void> addImageFromAsset(String name, String assetName) async {
+    final ByteData bytes = await rootBundle.load(assetName);
+    final Uint8List list = bytes.buffer.asUint8List();
+    return controller.addImage(name, list);
+  }
+
   void _onStyleLoadedCallback() async {
+    await addImageFromAsset(
+        "custom-marker", "assets/symbols/custom-icon.png");
     await controller.addGeoJsonSource("points", _points);
     await controller.addGeoJsonSource("moving", _movingFeature(0));
 
@@ -74,7 +178,7 @@ class LayerState extends State {
     await controller.addFillLayer(
       "fills",
       "fills",
-      FillLayerProperties(fillColor: [
+      const FillLayerProperties(fillColor: [
         Expressions.interpolate,
         ['exponential', 0.5],
         [Expressions.zoom],
@@ -83,7 +187,6 @@ class LayerState extends State {
         18,
         'green'
       ], fillOpacity: 0.4),
-      belowLayerId: "water",
       filter: ['==', 'id', filteredId],
     );
 
@@ -115,8 +218,8 @@ class LayerState extends State {
     await controller.addSymbolLayer(
       "points",
       "symbols",
-      SymbolLayerProperties(
-        iconImage: "{type}-15",
+      const SymbolLayerProperties(
+        iconImage: "custom-marker", //  "{type}-15",
         iconSize: 2,
         iconAllowOverlap: true,
       ),
@@ -134,7 +237,8 @@ class LayerState extends State {
           Expressions.literal,
           [0, 2]
         ],
-        iconImage: "bicycle-15",
+        iconImage: "custom-marker",
+        // "bicycle-15",
         iconSize: 2,
         iconAllowOverlap: true,
         textAllowOverlap: true,
@@ -142,18 +246,13 @@ class LayerState extends State {
       minzoom: 11,
     );
 
-    bikeTimer = Timer.periodic(Duration(milliseconds: 10), (t) {
+    bikeTimer = Timer.periodic(const Duration(milliseconds: 10), (t) {
       controller.setGeoJsonSource("moving", _movingFeature(t.tick / 2000));
     });
 
-    filterTimer = Timer.periodic(Duration(seconds: 3), (t) {
+    filterTimer = Timer.periodic(const Duration(seconds: 3), (t) {
       filteredId = filteredId == 0 ? 1 : 0;
       controller.setFilter('fills', ['==', 'id', filteredId]);
-    });
-
-    visibilityTimer = Timer.periodic(Duration(seconds: 5), (t) {
-      isVisible = !isVisible;
-      controller.setVisibility('water', isVisible);
     });
   }
 
@@ -161,7 +260,6 @@ class LayerState extends State {
   void dispose() {
     bikeTimer?.cancel();
     filterTimer?.cancel();
-    visibilityTimer?.cancel();
     super.dispose();
   }
 }
@@ -170,11 +268,11 @@ Map<String, dynamic> _movingFeature(double t) {
   List<double> makeLatLong(double t) {
     final angle = t * 2 * pi;
     const r = 0.025;
-    const center_x = 151.1849;
-    const center_y = -33.8748;
+    const centerX = 151.1849;
+    const centerY = -33.8748;
     return [
-      center_x + r * sin(angle),
-      center_y + r * cos(angle),
+      centerX + r * sin(angle),
+      centerY + r * cos(angle),
     ];
   }
 
