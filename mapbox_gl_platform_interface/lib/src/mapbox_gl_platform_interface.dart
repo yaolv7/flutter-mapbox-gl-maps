@@ -93,7 +93,16 @@ abstract class MapboxGlPlatform {
 
   Future<void> removeLayer(String imageLayerId);
 
+  Future<List> querySourceFeatures(
+      String sourceId, String? sourceLayerId, List<Object>? filter);
+
+  Future<List> getLayerIds();
+
+  Future<List> getSourceIds();
+
   Future<void> setFilter(String layerId, dynamic filter);
+
+  Future<dynamic> getFilter(String layerId);
 
   Future<void> setVisibility(String layerId, bool isVisible);
 

@@ -1092,4 +1092,48 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
   void forceResizeWebMap() {
     _map.resize();
   }
+
+  @override
+  Future<List> querySourceFeatures(
+      String sourceId, String? sourceLayerId, List<Object>? filter) async {
+    Map<String, dynamic> parameters = {};
+
+    if (sourceLayerId != null) {
+      parameters['sourceLayer'] = sourceLayerId;
+    }
+
+    if (filter != null) {
+      parameters['filter'] = filter;
+    }
+    print(parameters);
+
+    return _map
+        .querySourceFeatures(sourceId, parameters)
+        .map((feature) => {
+      'type': 'Feature',
+      'id': feature.id,
+      'geometry': {
+        'type': feature.geometry.type,
+        'coordinates': feature.geometry.coordinates,
+      },
+      'properties': feature.properties,
+      'source': feature.source,
+    })
+        .toList();
+  }
+
+  @override
+  Future getFilter(String layerId) async {
+    return _map.getFilter(layerId);
+  }
+
+  @override
+  Future<List> getLayerIds() async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List> getSourceIds() async {
+    throw UnimplementedError();
+  }
 }

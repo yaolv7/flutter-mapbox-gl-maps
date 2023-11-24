@@ -1430,6 +1430,31 @@ class MapboxMapController extends ChangeNotifier {
     return _mapboxGlPlatform.takeSnapshot(snapshotOptions);
   }
 
+  Future<dynamic> getFilter(String layerId) {
+    return _mapboxGlPlatform.getFilter(layerId);
+  }
+
+  /// Query rendered features at a point in screen coordinates
+  /// Note: On web, this will probably only work for GeoJson source, not for vector tiles
+  Future<List> querySourceFeatures(
+      String sourceId, String? sourceLayerId, List<Object>? filter) async {
+    return _mapboxGlPlatform.querySourceFeatures(
+        sourceId, sourceLayerId, filter);
+  }
+
+  Future<List> getLayerIds() {
+    return _mapboxGlPlatform.getLayerIds();
+  }
+
+  /// Retrieve every source ids of the map as a [String] list, including the ones added internally
+  ///
+  /// This method is not currently implemented on the web
+  Future<List<String>> getSourceIds() async {
+    return (await _mapboxGlPlatform.getSourceIds())
+        .whereType<String>()
+        .toList();
+  }
+
   @override
   void dispose() {
     _disposed = true;

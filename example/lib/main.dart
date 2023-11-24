@@ -15,6 +15,7 @@ import 'annotation_order_maps.dart';
 import 'click_annotations.dart';
 import 'custom_marker.dart';
 import 'full_map.dart';
+import 'get_map_informations.dart';
 import 'layer.dart';
 import 'line.dart';
 import 'local_style.dart';
@@ -50,7 +51,8 @@ final List<ExamplePage> _allPages = <ExamplePage>[
   BatchAddPage(),
   TakeSnapPage(),
   ClickAnnotationPage(),
-  Sources()
+  Sources(),
+  GetMapInfoPage(),
 ];
 
 class MapsDemo extends StatefulWidget {

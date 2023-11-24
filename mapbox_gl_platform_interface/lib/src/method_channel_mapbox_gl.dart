@@ -789,4 +789,58 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
       return new Future.error(e);
     }
   }
+
+  @override
+  Future<List> getLayerIds() async {
+    try {
+      final Map<dynamic, dynamic> reply =
+      await _channel.invokeMethod('style#getLayerIds');
+      return reply['layers'].map((it) => it.toString()).toList();
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
+  @override
+  Future<List> getSourceIds() async {
+    try {
+      final Map<dynamic, dynamic> reply =
+      await _channel.invokeMethod('style#getSourceIds');
+      return reply['sources'].map((it) => it.toString()).toList();
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
+  @override
+  Future<List> querySourceFeatures(
+      String sourceId, String? sourceLayerId, List<Object>? filter) async {
+    try {
+      final Map<dynamic, dynamic> reply = await _channel.invokeMethod(
+        'map#querySourceFeatures',
+        <String, Object?>{
+          'sourceId': sourceId,
+          'sourceLayerId': sourceLayerId,
+          'filter': filter,
+        },
+      );
+      return reply['features'].map((feature) => jsonDecode(feature)).toList();
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
+  @override
+  Future<dynamic> getFilter(String layerId) async {
+    try {
+      Map<dynamic, dynamic> reply =
+      await _channel.invokeMethod('style#getFilter', <String, dynamic>{
+        'layerId': layerId,
+      });
+      final filter = reply["filter"];
+      return filter != null ? jsonDecode(filter) : null;
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
 }

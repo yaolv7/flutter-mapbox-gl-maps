@@ -70,6 +70,7 @@ class MapUiBodyState extends State<MapUiBody> {
   MyLocationTrackingMode _myLocationTrackingMode = MyLocationTrackingMode.None;
   List<Object>? _featureQueryFilter;
   Fill? _selectedFill;
+  bool _countriesVisible = true;
 
   @override
   void initState() {
@@ -296,6 +297,27 @@ class MapUiBodyState extends State<MapUiBody> {
     );
   }
 
+  Widget _layerVisibilityToggler() {
+    return TextButton(
+      child: const Text('toggle layer visibility'),
+      onPressed: () async {
+        _countriesVisible = !_countriesVisible;
+        mapController?.setVisibility('water', _countriesVisible);
+      },
+    );
+  }
+
+  Widget _sourceFeaturesGetter() {
+    return TextButton(
+      child: const Text('get source features (maplibre)'),
+      onPressed: () async {
+        var result = await mapController!
+            .querySourceFeatures("composite", "water", null);
+        debugPrint(result.toString());
+      },
+    );
+  }
+
   _clearFill() {
     if (_selectedFill != null) {
       mapController!.removeFill(_selectedFill!);
@@ -417,6 +439,8 @@ class MapUiBodyState extends State<MapUiBody> {
           _myLocationToggler(),
           _telemetryToggler(),
           _visibleRegionGetter(),
+          _layerVisibilityToggler(),
+          _sourceFeaturesGetter(),
         ],
       );
     }
