@@ -9,7 +9,7 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 import 'main.dart';
 import 'page.dart';
 
-const randomMarkerNum = 100;
+const randomMarkerNum = 30;
 
 class CustomMarkerPage extends ExamplePage {
   CustomMarkerPage() : super(const Icon(Icons.place), 'Custom marker');
@@ -31,223 +31,238 @@ class CustomMarkerState extends State<CustomMarker> {
   final Random _rnd = new Random();
 
   late MapboxMapController _mapController;
-  List<Marker> _markers = [];
-  List<_MarkerState> _markerStates = [];
-
-  void _addMarkerStates(_MarkerState markerState) {
-    _markerStates.add(markerState);
-  }
+  List<MarkerWidget> _markers = [];
 
   void _onMapCreated(MapboxMapController controller) {
     _mapController = controller;
-    controller.addListener(() {
-      if (controller.isCameraMoving) {
-        _updateMarkerPosition();
-      }
-    });
-  }
-
-  void _onStyleLoadedCallback() {
-    print('onStyleLoadedCallback');
   }
 
   void _onMapLongClickCallback(Point<double> point, LatLng coordinates) {
     _addMarker(point, coordinates);
   }
 
-  void _onCameraIdleCallback() {
-    _updateMarkerPosition();
-  }
-
-  void _updateMarkerPosition() {
-    final coordinates = <LatLng>[];
-
-    for (final markerState in _markerStates) {
-      coordinates.add(markerState.getCoordinate());
-    }
-
-    _mapController.toScreenLocationBatch(coordinates).then((points) {
-      _markerStates.asMap().forEach((i, value) {
-        _markerStates[i].updatePosition(points[i]);
-      });
-    });
-  }
-
   void _addMarker(Point<double> point, LatLng coordinates) {
     setState(() {
-      _markers.add(Marker(_rnd.nextInt(100000).toString(), coordinates, point,
-          _addMarkerStates));
+      _markers.add(MarkerWidget(
+        key: _rnd.nextInt(100000).toString(),
+        marker: MarkerData(latLng: coordinates, point: point),
+        mapController: _mapController,
+        onMarkerLongPress: (MarkerData maker) {
+          // 可能会删除相同位置的点，需要自己在项目里优化
+          setState(() {
+            _markers.removeWhere(
+                (element) => element.marker.latLng == maker.latLng);
+          });
+        },
+      ));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       body: Stack(children: [
         MapboxMap(
+          // 旋转
+          rotateGesturesEnabled: false,
+          // 3D 仰角
+          tiltGesturesEnabled: false,
+          // 显示位置会一直打印log updateAcquireFence: Did not find frame.
+          // myLocationEnabled: true,
           accessToken: MapsDemo.ACCESS_TOKEN,
           trackCameraPosition: true,
           onMapCreated: _onMapCreated,
-          onMapLongClick: _onMapLongClickCallback,
-          onCameraIdle: _onCameraIdleCallback,
-          onStyleLoadedCallback: _onStyleLoadedCallback,
+          onMapClick: _onMapLongClickCallback,
           initialCameraPosition:
               const CameraPosition(target: LatLng(35.0, 135.0), zoom: 5),
         ),
-        IgnorePointer(
-            ignoring: true,
-            child: Stack(
-              children: _markers,
-            ))
+        Stack(
+          children: _markers,
+        ),
       ]),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          //_measurePerformance();
-
-          // Generate random markers
-          var param = <LatLng>[];
-          for (var i = 0; i < randomMarkerNum; i++) {
-            final lat = _rnd.nextDouble() * 20 + 30;
-            final lng = _rnd.nextDouble() * 20 + 125;
-            param.add(LatLng(lat, lng));
-          }
-
-          _mapController.toScreenLocationBatch(param).then((value) {
+          if (_markers.isNotEmpty) {
+            debugPrint(' ---**2 ${_markers.map((e) => e.marker).join(' , ')}');
+          } else {
+            // Generate random markers
+            var param = <LatLng>[];
             for (var i = 0; i < randomMarkerNum; i++) {
-              var point =
-                  Point<double>(value[i].x as double, value[i].y as double);
-              _addMarker(point, param[i]);
+              final lat = _rnd.nextDouble() * 20 + 30;
+              final lng = _rnd.nextDouble() * 20 + 125;
+              param.add(LatLng(lat, lng));
             }
-          });
+
+            _mapController.toScreenLocationBatch(param).then((value) {
+              for (var i = 0; i < param.length; i++) {
+                var point =
+                    Point<double>(value[i].x as double, value[i].y as double);
+                _addMarker(point, param[i]);
+              }
+
+              debugPrint(
+                  ' ---**1 ${_markers.map((e) => e.marker).join(' , ')}');
+            });
+          }
         },
         child: Icon(Icons.add),
       ),
     );
   }
-
-  // ignore: unused_element
-  void _measurePerformance() {
-    final trial = 10;
-    final batches = [500, 1000, 1500, 2000, 2500, 3000];
-    var results = Map<int, List<double>>();
-    for (final batch in batches) {
-      results[batch] = [0.0, 0.0];
-    }
-
-    _mapController.toScreenLocation(LatLng(0, 0));
-    Stopwatch sw = Stopwatch();
-
-    for (final batch in batches) {
-      //
-      // primitive
-      //
-      for (var i = 0; i < trial; i++) {
-        sw.start();
-        var list = <Future<Point<num>>>[];
-        for (var j = 0; j < batch; j++) {
-          var p = _mapController
-              .toScreenLocation(LatLng(j.toDouble() % 80, j.toDouble() % 300));
-          list.add(p);
-        }
-        Future.wait(list);
-        sw.stop();
-        results[batch]![0] += sw.elapsedMilliseconds;
-        sw.reset();
-      }
-
-      //
-      // batch
-      //
-      for (var i = 0; i < trial; i++) {
-        sw.start();
-        var param = <LatLng>[];
-        for (var j = 0; j < batch; j++) {
-          param.add(LatLng(j.toDouble() % 80, j.toDouble() % 300));
-        }
-        Future.wait([_mapController.toScreenLocationBatch(param)]);
-        sw.stop();
-        results[batch]![1] += sw.elapsedMilliseconds;
-        sw.reset();
-      }
-
-      print(
-          'batch=$batch,primitive=${results[batch]![0] / trial}ms, batch=${results[batch]![1] / trial}ms');
-    }
-  }
 }
 
-class Marker extends StatefulWidget {
-  final Point _initialPosition;
-  final LatLng _coordinate;
-  final void Function(_MarkerState) _addMarkerState;
+class MarkerData {
+  Point<double> point;
+  LatLng latLng;
+  final double iconSize;
 
-  Marker(
-      String key, this._coordinate, this._initialPosition, this._addMarkerState)
-      : super(key: Key(key));
+  MarkerData({
+    required this.point,
+    required this.latLng,
+    this.iconSize = 40,
+  });
+
+  MarkerData copyWith({
+    Point<double>? point,
+    LatLng? latLng,
+    double? iconSize,
+  }) =>
+      MarkerData(
+        point: point ?? this.point,
+        latLng: latLng ?? this.latLng,
+        iconSize: iconSize ?? this.iconSize,
+      );
 
   @override
-  State<StatefulWidget> createState() {
-    final state = _MarkerState(_initialPosition);
-    _addMarkerState(state);
-    return state;
+  String toString() {
+    // return 'MarkerData{point: $point, latLng: $latLng, iconSize: $iconSize}';
+    return '$latLng';
   }
 }
 
-class _MarkerState extends State with TickerProviderStateMixin {
-  final _iconSize = 20.0;
+class MarkerWidget extends StatefulWidget {
+  final MarkerData marker;
+  final MapboxMapController mapController;
+  final Function(MarkerData maker) onMarkerLongPress;
 
-  Point _position;
+  MarkerWidget({
+    required String key,
+    required this.marker,
+    required this.mapController,
+    required this.onMarkerLongPress,
+  }) : super(key: Key(key));
 
-  late AnimationController _controller;
-  late Animation<double> _animation;
+  @override
+  State<StatefulWidget> createState() => _MarkerState();
+}
 
-  _MarkerState(this._position);
+class _MarkerState extends State<MarkerWidget> {
+  late Point<double> pixelPosition;
+  late LatLng _dragPosStart;
+  late LatLng _markerPointStart;
+  double _ratio = 1.0;
+  double _iconSize = 2;
+
+  LatLng get markerPoint => widget.marker.latLng;
 
   @override
   void initState() {
+    _iconSize = widget.marker.iconSize;
+    pixelPosition = widget.marker.point;
+    var mapController = widget.mapController;
+    mapController.addListener(() async {
+      if (mapController.isCameraMoving) {
+        await _updateMarkerPosition();
+      }
+    });
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.elasticOut,
-    );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  _MarkerState();
 
   @override
   Widget build(BuildContext context) {
-    var ratio = 1.0;
+    _updatePixelPos(markerPoint);
 
     //web does not support Platform._operatingSystem
     if (!kIsWeb) {
       // iOS returns logical pixel while Android returns screen pixel
-      ratio = Platform.isIOS ? 1.0 : MediaQuery.of(context).devicePixelRatio;
+      _ratio = Platform.isIOS ? 1.0 : MediaQuery.of(context).devicePixelRatio;
     }
 
-    return Positioned(
-        left: _position.x / ratio - _iconSize / 2,
-        top: _position.y / ratio - _iconSize / 2,
-        child: RotationTransition(
-            turns: _animation,
-            child: Image.asset('assets/symbols/2.0x/custom-icon.png',
-                height: _iconSize)));
+    return GestureDetector(
+        // drag detectors
+        onVerticalDragStart: _onPanStart,
+        onVerticalDragUpdate: _onPanUpdate,
+        onHorizontalDragStart: _onPanStart,
+        onHorizontalDragUpdate: _onPanUpdate,
+        // onTap: _onTap,
+        onLongPress: () =>
+            widget.onMarkerLongPress.call(widget.marker.copyWith()),
+        child: Stack(
+          children: [
+            Positioned(
+                left: pixelPosition.x / _ratio - _iconSize / 2,
+                top: pixelPosition.y / _ratio - _iconSize / 2,
+                child: Image.asset('assets/symbols/2.0x/custom-icon.png',
+                    height: _iconSize))
+          ],
+        ));
   }
 
-  void updatePosition(Point<num> point) {
+  void updatePosition(Point<double> point) {
     setState(() {
-      _position = point;
+      widget.marker.point = point;
     });
   }
 
-  LatLng getCoordinate() {
-    return (widget as Marker)._coordinate;
+  Future<void> _onPanStart(DragStartDetails details) async {
+    _dragPosStart = await _offsetToCrs(details.localPosition);
+    _markerPointStart = LatLng(markerPoint.latitude, markerPoint.longitude);
+  }
+
+  Future<void> _onPanUpdate(DragUpdateDetails details) async {
+    final dragPos = await _offsetToCrs(details.localPosition);
+
+    final deltaLat = dragPos.latitude - _dragPosStart.latitude;
+    final deltaLon = dragPos.longitude - _dragPosStart.longitude;
+
+    setState(() {
+      widget.marker.latLng = LatLng(
+        _markerPointStart.latitude + deltaLat,
+        _markerPointStart.longitude + deltaLon,
+      );
+      _updatePixelPos(markerPoint);
+    });
+  }
+
+  Future<LatLng> _offsetToCrs(Offset offset) async {
+    // Get the widget's offset
+    final renderObject = context.findRenderObject() as RenderBox;
+    final width = renderObject.size.width;
+    final height = renderObject.size.height;
+    final mapState = widget.mapController;
+
+    // convert the point to global coordinates
+    final localPoint = Point<double>(offset.dx * _ratio, offset.dy * _ratio);
+    final localPointCenterDistance =
+        Point<double>((width / 2) - localPoint.x, (height / 2) - localPoint.y);
+    final mapCenter =
+        await mapState.toScreenLocation(mapState.cameraPosition!.target);
+    final point = mapCenter - localPointCenterDistance;
+    return mapState.toLatLng(point);
+  }
+
+  Future<void> _updatePixelPos(LatLng latLng) async {
+    final mapState = widget.mapController;
+    final pos = await mapState.toScreenLocation(latLng);
+    var point2 = Point(pos.x.toDouble(), pos.y.toDouble());
+    pixelPosition = point2;
+  }
+
+  /// 在地图移动时，更新位置
+  Future<void> _updateMarkerPosition() async {
+    var point = await widget.mapController.toScreenLocation(markerPoint);
+    updatePosition(Point(point.x.toDouble(), point.y.toDouble()));
   }
 }
