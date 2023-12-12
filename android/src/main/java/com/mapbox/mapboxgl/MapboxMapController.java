@@ -35,6 +35,7 @@ import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
 import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineResult;
+import com.mapbox.android.core.location.MyLocationEngineProvider;
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.telemetry.TelemetryEnabler;
@@ -278,7 +279,7 @@ final class MapboxMapController
   @SuppressWarnings({"MissingPermission"})
   private void enableLocationComponent(@NonNull Style style) {
     if (hasLocationPermission()) {
-      locationEngine = LocationEngineProvider.getBestLocationEngine(context);
+      locationEngine = MyLocationEngineProvider.getLocationEngine(context);
       locationComponent = mapboxMap.getLocationComponent();
       locationComponent.activateLocationComponent(
           context, style, buildLocationComponentOptions(style));
